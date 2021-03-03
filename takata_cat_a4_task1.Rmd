@@ -1,0 +1,59 @@
+---
+title: "Agglomerative hierarchical clustering "
+author: "Catherine Takata"
+date: "3/2/2021"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: show
+    toc: true
+---
+
+## Summary 
+We will perform hierarchical clustering by site. First, we will make a data frame that has a single summary row per site (e.g. based on means from all observations at that site), then calculate the euclidean distance before performing complete linkage agglomerative hierarchical clustering. 
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(janitor)
+
+# Packages for cluster analysis:
+library(NbClust)
+library(cluster)
+library(factoextra)
+library(dendextend)
+library(ggdendro)
+```
+
+
+```{r}
+# Read in data and convert -999 values to NA.
+water_chem <- read.csv(here("data", "sbc_lter_registered_stream_chemistry.csv")) %>% 
+  na_if(-999.0) %>% 
+  clean_names()
+```
+
+
+```{r}
+# Scale the numeric variables (columns 3:7)
+water_scaled <- water_chem %>% 
+  select(3:12) %>% 
+  scale()
+  
+
+# Update to add rownames (country name) from wb_ghg_20
+rownames(water_scaled) <- water_chem$site_code
+
+```
+
+
+```{r}
+# Take means from all observations at each site
+water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
+
+# Create a data frame that has a single summary row per site 
+water_sum <- water_chem %>% 
+  select(site_code, summary)
+```
+
