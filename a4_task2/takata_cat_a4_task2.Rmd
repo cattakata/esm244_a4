@@ -9,23 +9,59 @@ output:
     toc: true
 ---
 
+## Summary 
+We will identify an equation with parameters estimated by nonlinear least squares for the increase in global wild fish catch from 1950 – 2012.
+
+**Source**: Global wild fish catch and aquaculture production, compiled by Earth Policy Institute with 1950-2010 from U.N. Food and Agriculture Organization (FAO), Global Capture Production and Global Aquaculture Production, electronic databases, at www.fao.org/fishery/topic/16140/en.
+
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+
 library(tidyverse)
 library(here)
 library(boot)
-library(gt)
 library(patchwork)
 library(broom)
 library(nlstools)
-
-# Note: get gt package from GitHub
-# library(devtools)
-# remotes::install_github("rstudio/gt")
 ```
 
 ```{r}
 # Read in data 
-fish_catch <- read.csv()
+fish_catch <- read.csv(here("a4_task2", "data", "fish_catch.csv"), col.names = c("year", "wild_catch", "farmed_fish", "total_fish_production")) %>% 
+  mutate(time = year) 
+
+fish_catch[1, 5] = 0
 ```
 
+
+## Exploratory graph 
+
+```{r}
+ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Wild catch over from 1950-2012",
+       x = "time (years)", 
+       y = "wild catch (million tons)") 
+```
+
+```{r}
+# Look at the log transformed data:
+ggplot(data = fish_catch, aes(x = year, y = log(wild_catch))) +
+  geom_point() +
+  theme_minimal() +
+  labs(title = "Wild catch over from 1950-2012",
+       x = "time (years)", 
+       y = "ln(wild catch)") 
+```
+
+
+## Parameter outcomes 
+
+
+
+
+
+
+## Finalized results 
