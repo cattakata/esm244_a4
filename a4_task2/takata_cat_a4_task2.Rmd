@@ -41,7 +41,7 @@ fish_catch[1, 5] = 0
 ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
   geom_point() +
   theme_minimal() +
-  labs(title = "Wild catch over from 1950-2012",
+  labs(title = "Wild catch from 1950-2012",
        x = "time (years)", 
        y = "wild catch (million tons)") 
 ```
@@ -51,11 +51,10 @@ ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
 ggplot(data = fish_catch, aes(x = year, y = log(wild_catch))) +
   geom_point() +
   theme_minimal() +
-  labs(title = "Wild catch over from 1950-2012",
+  labs(title = "Logrithmic wild catch from 1950-2012",
        x = "time (years)", 
        y = "ln(wild catch)") 
 ```
-
 
 ## Parameter outcomes 
 
