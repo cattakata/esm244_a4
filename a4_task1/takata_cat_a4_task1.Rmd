@@ -29,7 +29,7 @@ library(ggdendro)
 
 ```{r}
 # Read in data and convert -999 values to NA.
-water_chem <- read.csv(here("data", "sbc_lter_registered_stream_chemistry.csv")) %>% 
+water_chem <- read.csv(here("a4_task1", "data", "sbc_lter_registered_stream_chemistry.csv")) %>% 
   na_if(-999.0) %>% 
   clean_names()
 ```
@@ -50,10 +50,11 @@ water_chem <- read.csv(here("data", "sbc_lter_registered_stream_chemistry.csv"))
 
 ```{r}
 # Take means from all scaled observations at each site
-water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
+#water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
 
 # Create a data frame that has a single summary row per site 
 water_sum <- water_chem %>% 
-  select(site_code, summary)
+  group_by(site_code) %>% 
+  summarize(mean = rowMeans(water_chem[3:12], na.rm = TRUE))
 ```
 

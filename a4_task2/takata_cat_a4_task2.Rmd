@@ -1,0 +1,31 @@
+---
+title: "Parameter Estimation – Wild Fish Catch"
+author: "Catherine Takata"
+date: "3/2/2021"
+output: 
+  html_document:
+    theme: cerulean
+    code_folding: show
+    toc: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(here)
+library(boot)
+library(gt)
+library(patchwork)
+library(broom)
+library(nlstools)
+
+# Note: get gt package from GitHub
+# library(devtools)
+# remotes::install_github("rstudio/gt")
+```
+
+```{r}
+# Read in data 
+fish_catch <- read.csv()
+```
+
