@@ -36,20 +36,20 @@ water_chem <- read.csv(here("data", "sbc_lter_registered_stream_chemistry.csv"))
 
 
 ```{r}
-# Scale the numeric variables (columns 3:7)
-water_scaled <- water_chem %>% 
-  select(3:12) %>% 
-  scale()
+# Scale the numeric variables (columns 3:12)
+#water_scaled <- water_chem %>% 
+  #select(3:12) %>% 
+  #scale()
   
-
-# Update to add rownames (country name) from wb_ghg_20
-rownames(water_scaled) <- water_chem$site_code
+# Update to add rownames (site_code) from water_chem
+#rownames(water_scaled) <- water_chem$site_code %>% 
+  
 
 ```
 
 
 ```{r}
-# Take means from all observations at each site
+# Take means from all scaled observations at each site
 water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
 
 # Create a data frame that has a single summary row per site 
