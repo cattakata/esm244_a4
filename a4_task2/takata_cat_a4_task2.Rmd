@@ -31,11 +31,11 @@ library(nlstools)
 fish_catch <- read.csv(here("a4_task2", "data", "fish_catch.csv"), col.names = c("year", "wild_catch", "farmed_fish", "total_fish_production")) %>% 
   mutate(time = year) 
 
-fish_catch[1, 5] = 0
+fish_catch[1:63, 5] = c(0:62)
 ```
 
 
-## Exploratory graphs 
+## Exploratory Graph
 
 ```{r}
 ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
@@ -47,20 +47,59 @@ ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
 ```
 
 ```{r}
-# Look at the log transformed data:
 ggplot(data = fish_catch, aes(x = year, y = log(wild_catch))) +
   geom_point() +
   theme_minimal() +
-  labs(title = "Logrithmic wild catch from 1950-2012",
+  labs(title = "Wild catch from 1950-2012",
        x = "time (years)", 
        y = "ln(wild catch)") 
 ```
 
-## Parameter outcomes 
+
+What type of relationship describes the trend? 
+- Logistic growth of a population over time 
+
+What does that look like mathematically (include an equation, possibly using LaTeX)? What are your initial estimates for the parameters in the model? 
+- inital estimates of K come from the point at which resrouces stop supporting growth of population once it reaches carring capacity 
+- at point where graph levels out 
+
+
+## Inital Estimates 
+
+```{r}
+# Estimate the growth rate constant (k) *during exponential growth phase)
+fish_est <- fish_catch %>%
+  filter(wild_catch < 95) %>% 
+  mutate(ln_wild_catch = log(wild_catch))
+
+# Model linear to get *k* estimate (the slope of this linear equation is an estimate of the growth rate constant
+lm_k <- lm(ln_wild_catch ~ time, data = fish_est)
+lm_k
+```
+
+We have initial estimate for k (0.03), and we can estimate K ~ 95 and A ~ 4.3.
+
+## Parameter Outcomes 
+
+Nonlinear least squares converges on parameter estimates that minimize the the sum of squares of residuals through an iterative algorithm
+
+```{r}
+fish_nls <- nls(wild_catch ~ K/(1 + A*exp(-r*time)),
+              data = fish_catch,
+              start = list(K = 95, A = 4.3, r = 0.025),
+              trace = TRUE
+              )
+
+summary(fish_nls)
+```
+
+
+
+## Finalized Results 
 
 
 
 
 
 
-## Finalized results 
+
