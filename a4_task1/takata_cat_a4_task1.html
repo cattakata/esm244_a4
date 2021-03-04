@@ -429,7 +429,7 @@ pre code {
 <ul>
 <li><a href="#summary">Summary</a></li>
 <li><a href="#euclidean-distances">Euclidean distances</a></li>
-<li><a href="#perform-hierarchical-clustering-by-complete-linkage">Perform hierarchical clustering by complete linkage</a></li>
+<li><a href="#hierarchical-clustering-by-complete-linkage-dendrograms">Hierarchical clustering by complete linkage dendrograms</a></li>
 </ul>
 </div>
 
@@ -463,8 +463,8 @@ rownames(water_scaled) &lt;- water_sum$site_code</code></pre>
 <pre class="r"><code># Compute dissimilarity values (Euclidean distances):
 euc_distance &lt;- dist(water_scaled, method = &quot;euclidean&quot;)</code></pre>
 </div>
-<div id="perform-hierarchical-clustering-by-complete-linkage" class="section level2">
-<h2>Perform hierarchical clustering by complete linkage</h2>
+<div id="hierarchical-clustering-by-complete-linkage-dendrograms" class="section level2">
+<h2>Hierarchical clustering by complete linkage dendrograms</h2>
 <p>Use stats::hclust() function to calcualte hierarchical clustering based on a dissimilarity matrix of euclidean distances. We will use complete linkages - clusters merged by the smallest maximum distance between two observations in distinct clusters.</p>
 <pre class="r"><code># Hierarchical clustering (complete linkage)
 cluster_complete &lt;- hclust(euc_distance, method = &quot;complete&quot; )
