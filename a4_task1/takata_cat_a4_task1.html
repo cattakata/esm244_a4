@@ -428,14 +428,49 @@ pre code {
 <div id="TOC">
 <ul>
 <li><a href="#summary">Summary</a></li>
+<li><a href="#euclidean-distances">Euclidean distances</a></li>
+<li><a href="#perform-hierarchical-clustering-by-complete-linkage">Perform hierarchical clustering by complete linkage</a></li>
 </ul>
 </div>
 
 <div id="summary" class="section level2">
 <h2>Summary</h2>
 <p>We will perform hierarchical clustering by site. First, we will make a data frame that has a single summary row per site (e.g. based on means from all observations at that site), then calculate the euclidean distance before performing complete linkage agglomerative hierarchical clustering.</p>
-<pre class="r"><code># Read in data 
-stream_chem &lt;- read.csv(here(&quot;data&quot;, &quot;sbc_lter_registered_stream_chemistry.csv&quot;))</code></pre>
+<pre class="r"><code># Read in data and convert -999 values to NA.
+water_chem &lt;- read.csv(here(&quot;a4_task1&quot;, &quot;data&quot;, &quot;sbc_lter_registered_stream_chemistry.csv&quot;)) %&gt;% 
+  na_if(-999.0) %&gt;% 
+  clean_names()</code></pre>
+<pre class="r"><code># Take means from all scaled observations at each site
+water_chem$summary &lt;- rowMeans(water_chem[3:12], na.rm = TRUE)
+
+# Create a data frame that has a single summary row per site 
+water_sum &lt;- water_chem %&gt;% 
+  select(site_code, summary) %&gt;% 
+  group_by(site_code) %&gt;% 
+  summarise(mean = mean(summary))</code></pre>
+<pre class="r"><code># Scale the numeric variables (columns 3:12)
+water_scaled &lt;- water_sum %&gt;% 
+  select(2) %&gt;% 
+  scale()
+  
+# Update to add rownames (site_code) from water_chem
+#rownames(water_scaled) &lt;- water_chem$site_code %&gt;% 
+rownames(water_scaled) &lt;- water_sum$site_code</code></pre>
+</div>
+<div id="euclidean-distances" class="section level2">
+<h2>Euclidean distances</h2>
+<p>Use the <code>stats::dist()</code> function to find the Euclidean distance in multivariate space between the different water quality indexes (by site):</p>
+<pre class="r"><code># Compute dissimilarity values (Euclidean distances):
+euc_distance &lt;- dist(water_scaled, method = &quot;euclidean&quot;)</code></pre>
+</div>
+<div id="perform-hierarchical-clustering-by-complete-linkage" class="section level2">
+<h2>Perform hierarchical clustering by complete linkage</h2>
+<p>Use stats::hclust() function to calcualte hierarchical clustering based on a dissimilarity matrix of euclidean distances. We will use complete linkages - clusters merged by the smallest maximum distance between two observations in distinct clusters.</p>
+<pre class="r"><code># Hierarchical clustering (complete linkage)
+cluster_complete &lt;- hclust(euc_distance, method = &quot;complete&quot; )
+
+# Plot it (base plot):
+plot(cluster_complete, cex = 0.6, hang = -1)</code></pre>
 </div>
 
 

@@ -26,7 +26,6 @@ library(dendextend)
 library(ggdendro)
 ```
 
-
 ```{r}
 # Read in data and convert -999 values to NA.
 water_chem <- read.csv(here("a4_task1", "data", "sbc_lter_registered_stream_chemistry.csv")) %>% 
@@ -34,27 +33,48 @@ water_chem <- read.csv(here("a4_task1", "data", "sbc_lter_registered_stream_chem
   clean_names()
 ```
 
-
-```{r}
-# Scale the numeric variables (columns 3:12)
-#water_scaled <- water_chem %>% 
-  #select(3:12) %>% 
-  #scale()
-  
-# Update to add rownames (site_code) from water_chem
-#rownames(water_scaled) <- water_chem$site_code %>% 
-  
-
-```
-
-
 ```{r}
 # Take means from all scaled observations at each site
-#water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
+water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
 
 # Create a data frame that has a single summary row per site 
 water_sum <- water_chem %>% 
+  select(site_code, summary) %>% 
   group_by(site_code) %>% 
-  summarize(mean = rowMeans(water_chem[3:12], na.rm = TRUE))
+  summarise(mean = mean(summary))
 ```
+
+```{r}
+# Scale the numeric variables (columns 3:12)
+water_scaled <- water_sum %>% 
+  select(2) %>% 
+  scale()
+  
+# Update to add rownames (site_code) from water_chem
+#rownames(water_scaled) <- water_chem$site_code %>% 
+rownames(water_scaled) <- water_sum$site_code
+
+```
+
+## Euclidean distances
+Use the `stats::dist()` function to find the Euclidean distance in multivariate space between the different water quality indexes (by site):
+
+```{r}
+# Compute dissimilarity values (Euclidean distances):
+euc_distance <- dist(water_scaled, method = "euclidean")
+```
+
+## Hierarchical clustering by complete linkage den
+Use stats::hclust() function to calcualte hierarchical clustering based on a dissimilarity matrix of euclidean distances. 
+We will use complete linkages - clusters merged by the smallest maximum distance between two observations in distinct clusters. 
+
+```{r, fig.show = 'hide'}
+# Hierarchical clustering (complete linkage)
+cluster_complete <- hclust(euc_distance, method = "complete" )
+
+# Plot it (base plot):
+plot(cluster_complete, cex = 0.6, hang = -1)
+```
+
+
 
