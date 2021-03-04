@@ -81,7 +81,8 @@ ggdendrogram(cluster_complete,
              rotate = TRUE) +
   theme_minimal() +
   labs(title = "Hierarchical Clustering of Santa Barbara Stream Chemistry by Site",
-       x = "Sites")
+       x = "Sites",
+       y = "")
 ```
 
 
