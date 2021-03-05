@@ -86,17 +86,40 @@ Nonlinear least squares converges on parameter estimates that minimize the the s
 ```{r}
 fish_nls <- nls(wild_catch ~ K/(1 + A*exp(-r*time)),
               data = fish_catch,
-              start = list(K = 95, A = 4.3, r = 0.025),
+              start = list(K = 95, A = 4.3, r = 0.03),
               trace = TRUE
               )
-
-summary(fish_nls)
 ```
 
+```{r}
+#See the model summary (null hypothesis: parameter value = 0)
+summary(fish_nls)
 
+# Use broom:: functions to get model outputs in tidier format: 
+model_out <- broom::tidy(fish_nls) 
+
+# Want to just get one of these?  
+A_est <- model_out$estimate[2] # Gets the first rown 
+```
+
+Our model with estimated parameters is:
+$$P(t) = \frac{100.3}{1+4.3e^{-0.06t}}$$
 
 ## Finalized Results 
 
+```{r}
+# Make predictions for the population at all of those times (time) in the original df: 
+p_predict <- predict(fish_nls)
+
+# Bind predictions to original data frame:
+fish_complete <- data.frame(fish_catch, p_predict)
+
+# Plot them all together:
+ggplot(data = fish_complete, aes(x = year, y = wild_catch)) +
+  geom_point() +
+  geom_line(aes(x = year, y = p_predict)) +
+  theme_minimal()
+```
 
 
 
