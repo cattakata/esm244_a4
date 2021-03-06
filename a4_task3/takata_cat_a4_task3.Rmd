@@ -9,26 +9,83 @@ output:
     toc: true
 ---
 
+## Summary 
+We will find the bootstrapped 95% confidence interval for the proportion of genderqueer individuals experiencing exclusionary conduct based on the 2014 UCSB survey data.
+Bootstrapping uses **sampling with replacement** to find a sampling distribution that is based on more than a single sample.
+
+Source: 2014 UCSB Campus Climate Project Final Report (prepared by Rankin & Associates Consulting. 
+
+
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE,
+                      warning = FALSE,
+                      message = FALSE)
+library(tidyverse)
+library(here)
+library(boot)
+library(patchwork)
+library(broom)
+library(nlstools)
 ```
 
-## R Markdown
+## Builds vector data 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+```{r}
+identified_exlusion <- rep(c(1, 0),times = c(22, 14))
 
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r cars}
-summary(cars)
+gender_df <-data.frame(identified_exlusion)
 ```
 
-## Including Plots
+## Bootstrapping 
 
-You can also embed plots, for example:
+```{r}
+# Create a function that will calculate the proportion of each bootstrapped sample
+prop_fun <- function(x,i) {sum(x[i]==1)/length(x)}
 
-```{r pressure, echo=FALSE}
-plot(pressure)
+# Create 100 bootstrap samples by resampling from the identified exclusion vector, using the function you created (prop_fun) to calculate the proportion of each:
+boot_100 <- boot(identified_exlusion, 
+                 statistic = prop_fun,
+                 R = 100)
+
+# Create 10000 bootstrap samples with replacement
+boot_10k <- boot(identified_exlusion,
+                 statistic = prop_fun, 
+                 R = 10000)
+
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+## Histogram 
+
+```{r}
+# Make vectors of bootstrap sample proportions
+# Create a data frame of the vectors to use ggplot 
+boot_100_df <- data.frame(bs_prop = boot_100$t)
+boot_10k_df <- data.frame(bs_prop = boot_10k$t)
+```
+
+```{r}
+# Histogram of 100 bootstrap sample means:
+plot_10k <- ggplot(data = boot_10k_df, aes(x = bs_prop)) +
+  geom_histogram() +
+  theme_minimal() +
+  labs(title = "Distribution of Proportion of Nonbinary/Genderqueer Students \nthat Experienced Exclusion",
+       x = "Proportion of Students", 
+       y = "Counts",
+       caption = "Figure 1")
+
+plot_10k
+```
+
+**Figure 1**: Sampling distribution based on proportions calculated from 10,000 bootstrap samples. 
+
+
+## Confidence Interval
+
+```{r}
+# Use `boot.ci()` to find the confidence interval for the bootstrapped distribution (here, with the 10k bootstrapped means):
+boot.ci(boot_10k, conf = 0.95, type = "perc")
+```
+
+There is a 95% confidence interval that the 0.44 to 0.78 range contains the true proportion of nonbinary/genderqueer students who experienced exlusion based on 10,000 bootrap generated samples of replacement. 
+
+
