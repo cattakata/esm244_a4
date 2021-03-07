@@ -1,5 +1,5 @@
 ---
-title: "Parameter Estimation – Wild Fish Catch"
+title: "Parameter Estimation of Wild Fish Catch"
 author: "Catherine Takata"
 date: "3/2/2021"
 output: 
@@ -21,9 +21,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 library(here)
 library(boot)
-library(patchwork)
 library(broom)
-library(nlstools)
+library(kableExtra)
 ```
 
 ```{r}
@@ -35,7 +34,7 @@ fish_catch[1:63, 5] = c(0:62)
 ```
 
 
-## Exploratory Graph
+## Exploratory Data Visualization 
 
 ```{r}
 ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
@@ -46,7 +45,7 @@ ggplot(data = fish_catch, aes(x = year, y = wild_catch)) +
        y = "wild catch (million tons)") 
 ```
 
-```{r}
+```{r, include = F, message = F}
 ggplot(data = fish_catch, aes(x = year, y = log(wild_catch))) +
   geom_point() +
   theme_minimal() +
@@ -56,17 +55,24 @@ ggplot(data = fish_catch, aes(x = year, y = log(wild_catch))) +
 ```
 
 
-What type of relationship describes the trend? 
-- Logistic growth of a population over time 
+Our initial exploration reveals a trend simialr to logistic growth of a population over time. As the number of wild catch increase with time, resource limitations halt growth, revealing a carry capacity shown at about 95 million tons of wild catch. Mathematically we can identiify paramters of K and A of the growth equation for the population at time t where: 
 
-What does that look like mathematically (include an equation, possibly using LaTeX)? What are your initial estimates for the parameters in the model? 
-- inital estimates of K come from the point at which resrouces stop supporting growth of population once it reaches carring capacity 
-- at point where graph levels out 
+$$A = \frac{K- P0}{P0}$$
+By identifying the relationship between K and A we can further evalute the growth curve for: 
+
+
+$$P(t) = \frac{K}{1+Ae^{-kt}}$$
+
+
+
+Our original start estimates of K come from the point at which resrouces stop supporting growth of population at the carring capacity where graph levels out at a constant rate. We can then calculate A as we relate the intial population of ~17 million tons to the carrying capacity. By using non linear least sqaures, we will find parameters to minimize square residuals by using iterative algorithms to converge on parameter estimates (since there is no single equation to calculate exactly what the paramter estimates would be). 
 
 
 ## Inital Estimates 
 
-```{r}
+```{r, include=F, message=F}
+# Initial Estimates 
+
 # Estimate the growth rate constant (k) *during exponential growth phase)
 fish_est <- fish_catch %>%
   filter(wild_catch < 95) %>% 
@@ -79,11 +85,10 @@ lm_k
 
 We have initial estimate for k (0.03), and we can estimate K ~ 95 and A ~ 4.3.
 
-## Parameter Outcomes 
 
-Nonlinear least squares converges on parameter estimates that minimize the the sum of squares of residuals through an iterative algorithm
+## Finalized Parameter Results 
 
-```{r}
+```{r, include=F, message=F}
 fish_nls <- nls(wild_catch ~ K/(1 + A*exp(-r*time)),
               data = fish_catch,
               start = list(K = 95, A = 4.3, r = 0.03),
@@ -91,21 +96,33 @@ fish_nls <- nls(wild_catch ~ K/(1 + A*exp(-r*time)),
               )
 ```
 
-```{r}
+```{r, include = F, message=F}
 #See the model summary (null hypothesis: parameter value = 0)
 summary(fish_nls)
 
 # Use broom:: functions to get model outputs in tidier format: 
-model_out <- broom::tidy(fish_nls) 
+model_out <- broom::tidy(fish_nls) %>% 
+  mutate(p.value = case_when(
+    p.value < 0.0001 ~ "<0.0001"
+  ))
 
-# Want to just get one of these?  
-A_est <- model_out$estimate[2] # Gets the first rown 
+# Gets the first rown 
+A_est <- model_out$estimate[2] 
 ```
 
-Our model with estimated parameters is:
-$$P(t) = \frac{100.3}{1+4.3e^{-0.06t}}$$
+**Table 1.** Model parameters outcomes (growth rate constant (k), carrying capacity (K), and (A)) for recorded wild fish catch. 
 
-## Finalized Results 
+```{r}
+model_out %>% 
+  kbl(col.names = c("Parameter", "Estimate", "Standard Error", "Statistic", "p - value")) %>% 
+  # kbl/kable() creates a clean data table for the knitted document  with labeled columns 
+  kable_styling(bootstrap_options = "striped", full_width = FALSE)
+```
+
+
+
+
+$$P(t) = \frac{100.3}{1+4.3e^{-0.06t}}$$
 
 ```{r}
 # Make predictions for the population at all of those times (time) in the original df: 
@@ -113,14 +130,23 @@ p_predict <- predict(fish_nls)
 
 # Bind predictions to original data frame:
 fish_complete <- data.frame(fish_catch, p_predict)
+```
 
+
+```{r}
 # Plot them all together:
 ggplot(data = fish_complete, aes(x = year, y = wild_catch)) +
   geom_point() +
   geom_line(aes(x = year, y = p_predict)) +
-  theme_minimal()
+  theme_minimal() + 
+  labs(title = "Least Squares Model of Wild Fish Catch Logistic Growth \nfrom 1950-2012",
+       x = "Years",
+       y = "Wild Catch (millions of tons)",
+       caption = "Figure 1")
 ```
 
+
+**Figure 1.** Non linear least square paramter calculations of wild catch fish from 1950-2012. Points correspond to original observations of logistic growth. Superimposed linear model indicates the paramters of k, K, and A to best fit our actual data based on interative algorithms convergered on parameter estimates. Data: Earth Policy Institute (1950-2010)
 
 
 
