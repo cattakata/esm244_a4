@@ -76,7 +76,7 @@ plot_10k <- ggplot(data = boot_10k_df, aes(x = bs_prop)) +
 plot_10k
 ```
 
-**Figure 1**: Sampling distribution based on proportions calculated from 10,000 bootstrap samples. 
+**Figure 1**: Sampling distribution based on proportions calculated from 10,000 bootstrap samples. Students who identified as genderqueer individuals valued at [1] to indicate "YES" to experiencing exclusionary conduct based on the 2014 UCSB survey data. 
 
 
 ## Confidence Interval

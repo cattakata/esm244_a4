@@ -1,5 +1,5 @@
 ---
-title: "Agglomerative hierarchical clustering of Santa Barbara Stream Chemistry"
+title: "Agglomerative Hierarchical Clustering of Santa Barbara Stream Chemistry"
 author: "Catherine Takata"
 date: "3/2/2021"
 output: 
@@ -34,10 +34,10 @@ water_chem <- read.csv(here("a4_task1", "data", "sbc_lter_registered_stream_chem
 ```
 
 ```{r}
-# Take means from all scaled observations at each site
+# Take means from all water chem variables (observations) per site
 water_chem$summary <- rowMeans(water_chem[3:12], na.rm = TRUE)
 
-# Create a data frame that has a single summary row per site 
+# Create a data set that has a single summary row per site 
 water_sum <- water_chem %>% 
   select(site_code, summary) %>% 
   group_by(site_code) %>% 
@@ -45,13 +45,12 @@ water_sum <- water_chem %>%
 ```
 
 ```{r}
-# Scale the numeric variables (columns 3:12)
+# Scale the numeric variables 
 water_scaled <- water_sum %>% 
   select(2) %>% 
   scale()
   
 # Update to add rownames (site_code) from water_chem
-#rownames(water_scaled) <- water_chem$site_code %>% 
 rownames(water_scaled) <- water_sum$site_code
 
 ```
@@ -64,9 +63,9 @@ Use the `stats::dist()` function to find the Euclidean distance in multivariate 
 euc_distance <- dist(water_scaled, method = "euclidean")
 ```
 
-## Hierarchical clustering by complete linkage dendrograms
-Use stats::hclust() function to calcualte hierarchical clustering based on a dissimilarity matrix of euclidean distances. 
-We will use complete linkages - clusters merged by the smallest maximum distance between two observations in distinct clusters. 
+## Complete Linkage Dendrogram
+Use stats::hclust() function to calcualte hierarchical clustering based on a matrix of euclidean distances. 
+Use complete linkages - merge clusters by the smallest maximum distance between two observations in distinct clusters. 
 
 ```{r, fig.show = 'hide'}
 # Hierarchical clustering (complete linkage)
